@@ -166,7 +166,7 @@ final class ShelfStore: ObservableObject {
               let png = rep.representation(using: .png, properties: [:]) else { return nil }
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd HH.mm.ss"
-        let dest = uniqueURL("Картинка \(f.string(from: Date())).png")
+        let dest = uniqueURL(L("Картинка", "Image") + " \(f.string(from: Date())).png")
         guard (try? png.write(to: dest)) != nil else { return nil }
         return ShelfItem(kind: .file, path: dest.path, owned: true)
     }

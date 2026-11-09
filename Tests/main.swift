@@ -1,5 +1,6 @@
 import AppKit
 setvbuf(stdout, nil, _IONBF, 0)
+setenv("NOTCHSTASH_LANG", "ru", 1)   // проверки ждут русские подписи
 
 var fails = 0
 func check(_ name: String, _ got: String?, _ want: String?) {

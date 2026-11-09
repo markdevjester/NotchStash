@@ -52,7 +52,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     /// Прогон сценариев без мыши: открыть, выбрать вторую запись, закрыть.
     private func runAutotest() {
-        func log(_ s: String) { print("AUTOTEST", s, "state=\(notch.model.state)", "visible=\(notch.panel.isVisible)"); fflush(stdout) }
+        func log(_ s: String) { print("AUTOTEST", s, "state=\(notch.model.state)", "shown=\(notch.isShown)", "onActiveSpace=\(notch.panel.isOnActiveSpace)", "key=\(notch.panel.isKeyWindow)"); fflush(stdout) }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { log("after peek") }
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { self.notch.toggle(); log("toggle open") }
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.8) { log("opened, key=\(self.notch.panel.isKeyWindow)") }
@@ -84,12 +84,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        menu.addItem(item("Открыть историю", #selector(openHistory), key: "v", mods: [.command, .shift]))
+        menu.addItem(item(L("Открыть историю", "Open History"), #selector(openHistory), key: "v", mods: [.command, .shift]))
         menu.addItem(.separator())
 
         let recent = Array(store.items.prefix(10))
         if recent.isEmpty {
-            let empty = NSMenuItem(title: "История пуста", action: nil, keyEquivalent: "")
+            let empty = NSMenuItem(title: L("История пуста", "History is empty"), action: nil, keyEquivalent: "")
             empty.isEnabled = false
             menu.addItem(empty)
         }
@@ -102,14 +102,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         menu.addItem(.separator())
 
-        menu.addItem(toggle("Пауза записи", "paused", false))
-        menu.addItem(toggle("Открывать наведением на чёлку", "hoverOpen"))
-        menu.addItem(toggle("Показывать «Скопировано» в чёлке", "peekOnCopy"))
-        menu.addItem(toggle("Распознавать текст на картинках", "ocr"))
-        menu.addItem(toggle("Открывать полку при перетаскивании к чёлке", "dragOpen"))
-        menu.addItem(toggle("Вставлять сразу (⌘V)", "autoPaste"))
+        menu.addItem(toggle(L("Пауза записи", "Pause Recording"), "paused", false))
+        menu.addItem(toggle(L("Открывать наведением на чёлку", "Open on Notch Hover"), "hoverOpen"))
+        menu.addItem(toggle(L("Показывать «Скопировано» в чёлке", "Show “Copied” in the Notch"), "peekOnCopy"))
+        menu.addItem(toggle(L("Распознавать текст на картинках", "Recognize Text in Images"), "ocr"))
+        menu.addItem(toggle(L("Открывать полку при перетаскивании к чёлке", "Open Shelf When Dragging to the Notch"), "dragOpen"))
+        menu.addItem(toggle(L("Вставлять сразу (⌘V)", "Paste Immediately (⌘V)"), "autoPaste"))
 
-        let limit = NSMenuItem(title: "Хранить записей", action: nil, keyEquivalent: "")
+        let limit = NSMenuItem(title: L("Хранить записей", "History Size"), action: nil, keyEquivalent: "")
         let sub = NSMenu()
         for n in [100, 200, 500, 1000, 5000] {
             let mi = item("\(n)", #selector(setLimit(_:)))
@@ -120,18 +120,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         limit.submenu = sub
         menu.addItem(limit)
 
-        let login = item("Запускать при входе", #selector(toggleLogin))
+        let langItem = NSMenuItem(title: L("Язык", "Language"), action: nil, keyEquivalent: "")
+        let langMenu = NSMenu()
+        for (code, title) in [("auto", L("Как в системе", "System")), ("en", "English"), ("ru", "Русский")] {
+            let mi = item(title, #selector(setLanguage(_:)))
+            mi.representedObject = code
+            mi.state = Lang.setting == code ? .on : .off
+            langMenu.addItem(mi)
+        }
+        langItem.submenu = langMenu
+        menu.addItem(langItem)
+
+        let login = item(L("Запускать при входе", "Launch at Login"), #selector(toggleLogin))
         login.state = SMAppService.mainApp.status == .enabled ? .on : .off
         menu.addItem(login)
 
         if !ClipboardWatcher.canPaste {
-            menu.addItem(item("Разрешить автовставку…", #selector(grantAccess)))
+            menu.addItem(item(L("Разрешить автовставку…", "Allow Auto-Paste…"), #selector(grantAccess)))
         }
         menu.addItem(.separator())
-        menu.addItem(item("Очистить историю (кроме закреплённых)", #selector(clearHistory)))
-        menu.addItem(item("Показать папку с историей", #selector(revealData)))
+        menu.addItem(item(L("Очистить историю (кроме закреплённых)", "Clear History (Keep Pinned)"), #selector(clearHistory)))
+        menu.addItem(item(L("Показать папку с историей", "Show Data Folder"), #selector(revealData)))
         menu.addItem(.separator())
-        menu.addItem(item("Выйти", #selector(quit), key: "q"))
+        menu.addItem(item(L("Выйти", "Quit NotchStash"), #selector(quit), key: "q"))
     }
 
     private func item(_ title: String, _ sel: Selector, key: String = "", mods: NSEvent.ModifierFlags = [.command]) -> NSMenuItem {
@@ -164,6 +175,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if key == "ocr" && new { store.backfillOCR() }
     }
 
+    @objc private func setLanguage(_ sender: NSMenuItem) {
+        guard let code = sender.representedObject as? String else { return }
+        UserDefaults.standard.set(code, forKey: "language")
+        notch.model.objectWillChange.send()
+    }
+
     @objc private func setLimit(_ sender: NSMenuItem) { store.maxItems = sender.tag }
 
     @objc private func toggleLogin() {
@@ -172,7 +189,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if s.status == .enabled { try s.unregister() } else { try s.register() }
         } catch {
             let a = NSAlert()
-            a.messageText = "Не получилось изменить автозапуск"
+            a.messageText = L("Не получилось изменить автозапуск", "Couldn’t change Launch at Login")
             a.informativeText = error.localizedDescription
             a.runModal()
         }

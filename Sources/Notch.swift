@@ -36,7 +36,9 @@ final class NotchModel: ObservableObject {
 }
 
 final class NotchPanel: NSPanel {
-    override var canBecomeKey: Bool { true }
+    /// Клавиатуру панель берёт только в открытом виде — невидимая не должна перехватывать набор текста.
+    var allowKey = false
+    override var canBecomeKey: Bool { allowKey }
     override var canBecomeMain: Bool { false }
 }
 
@@ -108,6 +110,22 @@ final class NotchController: NSObject, NSWindowDelegate {
         host.sizingOptions = []
         panel.contentView = host
 
+        // Окно всегда «стоит» на всех рабочих столах, просто невидимое и прозрачное для кликов.
+        // Если убирать его с экрана, macOS при открытии может вернуть его на прошлый рабочий стол.
+        panel.alphaValue = 0
+        panel.ignoresMouseEvents = true
+        if let s = Self.notchScreen { place(on: s) }
+        panel.orderFrontRegardless()
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification,
+                                                          object: nil, queue: .main) { [weak self] _ in
+            self?.panel.orderFrontRegardless()
+        }
+        NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification,
+                                               object: nil, queue: .main) { [weak self] _ in
+            guard let self, !self.isShown, let s = Self.notchScreen else { return }
+            self.place(on: s)
+        }
+
         mouseTimer = Timer.scheduledTimer(withTimeInterval: 0.07, repeats: true) { [weak self] _ in self?.tick() }
         mouseTimer?.tolerance = 0.03
     }
@@ -161,6 +179,27 @@ final class NotchController: NSObject, NSWindowDelegate {
         return NSScreen.screens.first { NSMouseInRect(p, $0.frame, false) } ?? NSScreen.main
     }
 
+    /// Видна ли панель сейчас (закрытая — невидимая, но остаётся на экране).
+    var isShown: Bool { panel.alphaValue > 0.01 }
+
+    private func showPanel(clickable: Bool) {
+        panel.allowKey = clickable
+        panel.ignoresMouseEvents = !clickable
+        panel.alphaValue = 1
+        panel.orderFrontRegardless()
+    }
+
+    private func hidePanel() {
+        panel.allowKey = false
+        panel.ignoresMouseEvents = true
+        panel.alphaValue = 0
+        // если панель держала клавиатуру — отдаём её обратно программе, где вы работали
+        if panel.isKeyWindow {
+            panel.orderOut(nil)
+            panel.orderFrontRegardless()
+        }
+    }
+
     private func place(on s: NSScreen) {
         screen = s
         model.notchSize = Self.notchSize(s)
@@ -183,7 +222,7 @@ final class NotchController: NSObject, NSWindowDelegate {
         hideWork?.cancel()
         peekWork?.cancel()
         let target = byHover ? (Self.screenUnderMouse ?? Self.notchScreen) : Self.screenUnderMouse
-        if !panel.isVisible || target != screen, let target {
+        if !isShown || target != screen, let target {
             withTransaction(Transaction(animation: nil)) { model.state = .closed }
             place(on: target)
         }
@@ -194,8 +233,7 @@ final class NotchController: NSObject, NSWindowDelegate {
         openedByHover = byHover
         sticky = !byHover
         outsideSince = nil
-        panel.ignoresMouseEvents = false
-        panel.orderFrontRegardless()
+        showPanel(clickable: true)
         if !byHover { makeKey() }
         installKeyMonitor()
         // даём окну один кадр в размере чёлки, потом раскрываем
@@ -216,7 +254,7 @@ final class NotchController: NSObject, NSWindowDelegate {
         hideWork?.cancel()
         let w = DispatchWorkItem { [weak self] in
             guard let self else { return }
-            if self.model.state == .closed { self.panel.orderOut(nil) }
+            if self.model.state == .closed { self.hidePanel() }
             done?()
         }
         hideWork = w
@@ -234,11 +272,10 @@ final class NotchController: NSObject, NSWindowDelegate {
         guard model.state != .open else { return }
         hideWork?.cancel()
         peekWork?.cancel()
-        if !panel.isVisible, let s = Self.notchScreen {
+        if !isShown, let s = Self.notchScreen {
             withTransaction(Transaction(animation: nil)) { model.state = .closed }
             place(on: s)
-            panel.ignoresMouseEvents = true
-            panel.orderFrontRegardless()
+            showPanel(clickable: false)
         }
         model.peekItem = item
         DispatchQueue.main.async {
@@ -248,7 +285,7 @@ final class NotchController: NSObject, NSWindowDelegate {
             guard let self, self.model.state == .peek else { return }
             withAnimation(Self.closeAnim) { self.model.state = .closed }
             let hide = DispatchWorkItem { [weak self] in
-                if self?.model.state == .closed { self?.panel.orderOut(nil) }
+                if self?.model.state == .closed { self?.hidePanel() }
             }
             self.hideWork = hide
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: hide)

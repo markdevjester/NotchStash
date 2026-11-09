@@ -87,14 +87,14 @@ struct PeekContent: View {
                     Image(systemName: "keyboard")
                         .foregroundStyle(.orange)
                         .font(.system(size: 13, weight: .semibold))
-                    Text("Не та раскладка?")
+                    Text(L("Не та раскладка?", "Wrong layout?"))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.orange.opacity(0.9))
                 } else {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                         .font(.system(size: 14, weight: .semibold))
-                    Text("Скопировано")
+                    Text(L("Скопировано", "Copied"))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.white.opacity(0.85))
                 }
@@ -110,7 +110,7 @@ struct PeekContent: View {
                     Text("= " + r).font(.system(size: 12, weight: .semibold, design: .rounded)).foregroundStyle(.white)
                 } else if item.kind == .image, item.ocrLine != nil {
                     HStack(spacing: 5) {
-                        Text("есть текст").font(.system(size: 10, weight: .medium)).foregroundStyle(.white.opacity(0.7))
+                        Text(L("есть текст", "has text")).font(.system(size: 10, weight: .medium)).foregroundStyle(.white.opacity(0.7))
                         Image(systemName: "text.viewfinder").font(.system(size: 13)).foregroundStyle(.white)
                         ItemIcon(item: item, store: store, size: 18)
                     }
@@ -147,10 +147,10 @@ struct OpenContent: View {
         VStack(spacing: 0) {
             // полоска на уровне чёлки: слева название, справа счётчик
             HStack(spacing: 4) {
-                tabButton(.history, "История", "clock")
-                tabButton(.shelf, shelf.items.isEmpty ? "Полка" : "Полка · \(shelf.items.count)", "tray")
+                tabButton(.history, L("История", "History"), "clock")
+                tabButton(.shelf, shelf.items.isEmpty ? L("Полка", "Shelf") : L("Полка", "Shelf") + " · \(shelf.items.count)", "tray")
                 Spacer()
-                Text(model.tab == .history ? "\(store.items.count) в истории" : "⇥ переключить")
+                Text(model.tab == .history ? L("\(store.items.count) в истории", "\(store.items.count) in history") : L("⇥ переключить", "⇥ switch"))
                     .font(.system(size: 11))
                     .foregroundStyle(.white.opacity(0.45))
             }
@@ -167,15 +167,15 @@ struct OpenContent: View {
             Rectangle().fill(.white.opacity(0.08)).frame(height: 1)
             HStack(spacing: 12) {
                 if model.tab == .shelf {
-                    hint("↩", "вставить"); hint("2× клик", "открыть"); hint("тяни", "в любую программу")
-                    hint("⌫", "убрать")
+                    hint("↩", L("вставить", "paste")); hint(L("2× клик", "2× click"), L("открыть", "open")); hint(L("тяни", "drag"), L("в любую программу", "into any app"))
+                    hint("⌫", L("убрать", "remove"))
                 } else {
-                    hint("↩", "вставить"); hint("⌘1–9", "быстро")
-                    hint("⌘L", "раскладка"); hint("⌘P", "закрепить"); hint("⌘⌫", "удалить")
+                    hint("↩", L("вставить", "paste")); hint("⌘1–9", L("быстро", "quick"))
+                    hint("⌘L", L("раскладка", "layout")); hint("⌘P", L("закрепить", "pin")); hint("⌘⌫", L("удалить", "delete"))
                 }
                 Spacer()
-                hint("⇥", model.tab == .shelf ? "история" : "полка")
-                hint("esc", "закрыть")
+                hint("⇥", model.tab == .shelf ? L("история", "history") : L("полка", "shelf"))
+                hint("esc", L("закрыть", "close"))
             }
             .padding(.horizontal, 20)
             .frame(height: 30)
@@ -194,8 +194,8 @@ struct OpenContent: View {
                 .strokeBorder(Color.white.opacity(0.55), style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
             VStack(spacing: 10) {
                 Image(systemName: "tray.and.arrow.down.fill").font(.system(size: 40)).foregroundStyle(.white)
-                Text("Отпустите — положу на полку").font(.system(size: 16, weight: .semibold)).foregroundStyle(.white)
-                Text("Файлы, картинки, ссылки и текст").font(.system(size: 12)).foregroundStyle(.white.opacity(0.5))
+                Text(L("Отпустите — положу на полку", "Drop it — I’ll keep it on the shelf")).font(.system(size: 16, weight: .semibold)).foregroundStyle(.white)
+                Text(L("Файлы, картинки, ссылки и текст", "Files, images, links and text")).font(.system(size: 12)).foregroundStyle(.white.opacity(0.5))
             }
         }
         .padding(.horizontal, 10)
@@ -228,10 +228,10 @@ struct OpenContent: View {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass").foregroundStyle(.white.opacity(0.5))
                 if model.staticRender {
-                    Text("Поиск в истории").font(.system(size: 14)).foregroundStyle(.white.opacity(0.35))
+                    Text(L("Поиск в истории", "Search history")).font(.system(size: 14)).foregroundStyle(.white.opacity(0.35))
                     Spacer()
                 } else {
-                    TextField("Поиск в истории", text: $model.query)
+                    TextField(L("Поиск в истории", "Search history"), text: $model.query)
                         .textFieldStyle(.plain)
                         .font(.system(size: 14))
                         .focused($searchFocused)
@@ -251,7 +251,7 @@ struct OpenContent: View {
                 VStack(spacing: 8) {
                     Image(systemName: model.query.isEmpty ? "tray" : "magnifyingglass")
                         .font(.system(size: 28)).foregroundStyle(.white.opacity(0.3))
-                    Text(model.query.isEmpty ? "Скопируйте что-нибудь — оно появится здесь" : "Ничего не нашлось")
+                    Text(model.query.isEmpty ? L("Скопируйте что-нибудь — оно появится здесь", "Copy something — it will show up here") : L("Ничего не нашлось", "Nothing found"))
                         .font(.system(size: 13)).foregroundStyle(.white.opacity(0.5))
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -293,11 +293,11 @@ struct OpenContent: View {
                             .onTapGesture { actions.pick(item, true) }
                             .onDrag { dragProvider(item) }
                             .contextMenu {
-                                Button("Вставить") { actions.pick(item, true) }
-                                Button("Только скопировать") { actions.pick(item, false) }
-                                Button(item.pinned ? "Открепить" : "Закрепить") { actions.pin(item) }
+                                Button(L("Вставить", "Paste")) { actions.pick(item, true) }
+                                Button(L("Только скопировать", "Copy Only")) { actions.pick(item, false) }
+                                Button(item.pinned ? L("Открепить", "Unpin") : L("Закрепить", "Pin")) { actions.pin(item) }
                                 Divider()
-                                Button("Удалить", role: .destructive) { actions.delete(item) }
+                                Button(L("Удалить", "Delete"), role: .destructive) { actions.delete(item) }
                             }
                     }
                 }
@@ -417,7 +417,7 @@ struct ClipRow: View {
     }
 
     private var rowTitle: String {
-        if item.kind == .image, let line = item.ocrLine { return "«\(line)»" }
+        if item.kind == .image, let line = item.ocrLine { return L("«\(line)»", "“\(line)”") }
         switch SmartCache.shared.smart(item) {
         case .math(let r): return item.title + " = " + r
         case .url(let u, _): return (u.host ?? "") + u.path
@@ -427,16 +427,19 @@ struct ClipRow: View {
 
     private var meta: String {
         let ago = Self.rel.localizedString(for: item.date, relativeTo: Date())
-        let kind = item.kind == .image && item.ocrLine != nil ? "картинка с текстом" : nil
+        let kind = item.kind == .image && item.ocrLine != nil ? L("картинка с текстом", "image with text") : nil
         return [kind, item.app, ago].compactMap { $0 }.joined(separator: " · ")
     }
 
-    static let rel: RelativeDateTimeFormatter = {
+    private static func formatter(_ id: String) -> RelativeDateTimeFormatter {
         let f = RelativeDateTimeFormatter()
-        f.locale = Locale(identifier: "ru_RU")
+        f.locale = Locale(identifier: id)
         f.unitsStyle = .short
         return f
-    }()
+    }
+    private static let relRu = formatter("ru_RU")
+    private static let relEn = formatter("en_US")
+    static var rel: RelativeDateTimeFormatter { Lang.isRussian ? relRu : relEn }
 }
 
 struct PreviewPane: View {
@@ -521,7 +524,7 @@ struct PreviewPane: View {
                     .font(.system(size: 34, weight: .semibold, design: .rounded)).foregroundStyle(.white)
                     .lineLimit(1).minimumScaleFactor(0.4)
                     .textSelection(.enabled)
-                chip("Вставить результат", system: "equal", key: nil) { actions.pasteText(r, true) }
+                chip(L("Вставить результат", "Paste Result"), system: "equal", key: nil) { actions.pasteText(r, true) }
                     .padding(.top, 4)
             }
         case .url(let u, let clean):
@@ -534,14 +537,14 @@ struct PreviewPane: View {
                 Text(u.absoluteString).font(.system(size: 11.5)).foregroundStyle(.white.opacity(0.55))
                     .lineLimit(6).truncationMode(.middle).textSelection(.enabled)
                 HStack(spacing: 6) {
-                    chip("Открыть", system: "safari", key: nil) { actions.open(u) }
+                    chip(L("Открыть", "Open"), system: "safari", key: nil) { actions.open(u) }
                     if let clean {
-                        chip("Без слежки", system: "eye.slash", key: nil) { actions.pasteText(clean.absoluteString, true) }
+                        chip(L("Без слежки", "No Tracking"), system: "eye.slash", key: nil) { actions.pasteText(clean.absoluteString, true) }
                     }
                 }
                 .padding(.top, 2)
                 if clean != nil {
-                    Text("В ссылке есть метки слежки (utm и др.) — «Без слежки» вставит чистую.")
+                    Text(L("В ссылке есть метки слежки (utm и др.) — «Без слежки» вставит чистую.", "This link has tracking tags (utm etc.) — “No Tracking” pastes a clean one."))
                         .font(.system(size: 10.5)).foregroundStyle(.white.opacity(0.4))
                 }
             }
@@ -549,8 +552,8 @@ struct PreviewPane: View {
             VStack(alignment: .leading, spacing: 8) {
                 scroll { code(pretty) }
                 HStack(spacing: 6) {
-                    chip("Красиво", system: "text.alignleft", key: nil) { actions.pasteText(pretty, true) }
-                    chip("В одну строку", system: "arrow.left.and.right", key: nil) { actions.pasteText(compact, true) }
+                    chip(L("Красиво", "Pretty"), system: "text.alignleft", key: nil) { actions.pasteText(pretty, true) }
+                    chip(L("В одну строку", "One Line"), system: "arrow.left.and.right", key: nil) { actions.pasteText(compact, true) }
                 }
             }
         case .code:
@@ -559,7 +562,7 @@ struct PreviewPane: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(e).font(.system(size: 16, weight: .medium)).foregroundStyle(.white).textSelection(.enabled)
                 if let u = URL(string: "mailto:" + e) {
-                    chip("Написать письмо", system: "envelope", key: nil) { actions.open(u) }
+                    chip(L("Написать письмо", "Write Email"), system: "envelope", key: nil) { actions.open(u) }
                 }
             }
         case nil:
@@ -587,14 +590,14 @@ struct PreviewPane: View {
             if item.ocrText == nil {
                 HStack(spacing: 6) {
                     if !staticRender { ProgressView().controlSize(.small) }
-                    Text(OCR.enabled ? "Читаю текст на картинке…" : "Распознавание текста выключено в меню")
+                    Text(OCR.enabled ? L("Читаю текст на картинке…", "Reading text in the image…") : L("Распознавание текста выключено в меню", "Text recognition is off in the menu"))
                         .font(.system(size: 11)).foregroundStyle(.white.opacity(0.45))
                 }
             } else if text.isEmpty {
-                Label("Текста на картинке нет", systemImage: "text.viewfinder")
+                Label(L("Текста на картинке нет", "No text in this image"), systemImage: "text.viewfinder")
                     .font(.system(size: 11)).foregroundStyle(.white.opacity(0.35))
             } else {
-                Label("Текст с картинки", systemImage: "text.viewfinder")
+                Label(L("Текст с картинки", "Text from image"), systemImage: "text.viewfinder")
                     .font(.system(size: 10.5, weight: .semibold)).foregroundStyle(.white.opacity(0.45))
                 scroll {
                     Text(String(text.prefix(20_000)))
@@ -605,8 +608,8 @@ struct PreviewPane: View {
                 }
                 .frame(maxHeight: .infinity, alignment: .top)
                 FlowLayout(spacing: 6) {
-                    chip("Вставить текст", system: "text.cursor", key: "⌘T") { actions.pasteText(text, true) }
-                    chip("Скопировать", system: "doc.on.doc", key: nil) { actions.pasteText(text, false) }
+                    chip(L("Вставить текст", "Paste Text"), system: "text.cursor", key: "⌘T") { actions.pasteText(text, true) }
+                    chip(L("Скопировать", "Copy"), system: "doc.on.doc", key: nil) { actions.pasteText(text, false) }
                     ForEach(Array(OCR.links(in: text).enumerated()), id: \.offset) { _, link in
                         chip(link.title, system: link.url.scheme == "tel" ? "phone" : link.url.scheme == "mailto" ? "envelope" : "link", key: nil) { actions.open(link.url) }
                     }
@@ -629,7 +632,7 @@ struct PreviewPane: View {
             HStack(spacing: 8) {
                 Image(systemName: "keyboard").foregroundStyle(.orange)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("Похоже, не та раскладка").font(.system(size: 10.5)).foregroundStyle(.orange.opacity(0.85))
+                    Text(L("Похоже, не та раскладка", "Looks like the wrong keyboard layout")).font(.system(size: 10.5)).foregroundStyle(.orange.opacity(0.85))
                     Text(fix).font(.system(size: 13, weight: .medium)).foregroundStyle(.white).lineLimit(2)
                 }
                 Spacer()
@@ -682,9 +685,9 @@ struct PreviewPane: View {
 
     private func details(_ item: ClipItem) -> String {
         var parts: [String] = []
-        if let app = item.app { parts.append("из \(app)") }
+        if let app = item.app { parts.append(L("из \(app)", "from \(app)")) }
         parts.append(ClipRow.rel.localizedString(for: item.date, relativeTo: Date()))
-        if item.kind == .text { parts.append("\((item.text ?? "").count) симв.") }
+        if item.kind == .text { parts.append(L("\((item.text ?? "").count) симв.", "\((item.text ?? "").count) chars")) }
         return parts.joined(separator: " · ")
     }
 }

@@ -17,8 +17,8 @@ struct ShelfView: View {
                     Text(countText)
                         .font(.system(size: 11)).foregroundStyle(.white.opacity(0.45))
                     Spacer()
-                    bar("AirDrop всё", "dot.radiowaves.left.and.right") { actions.shelfAirDrop(shelf.items) }
-                    bar("Очистить", "trash") { actions.shelfClear() }
+                    bar(L("AirDrop всё", "AirDrop All"), "dot.radiowaves.left.and.right") { actions.shelfAirDrop(shelf.items) }
+                    bar(L("Очистить", "Clear"), "trash") { actions.shelfClear() }
                 }
                 .padding(.horizontal, 18)
                 .frame(height: 36)
@@ -28,6 +28,7 @@ struct ShelfView: View {
 
     private var countText: String {
         let n = shelf.items.count
+        guard Lang.isRussian else { return n == 1 ? "1 item on the shelf" : "\(n) items on the shelf" }
         let word = n % 10 == 1 && n % 100 != 11 ? "вещь"
             : (2...4).contains(n % 10) && !(12...14).contains(n % 100) ? "вещи" : "вещей"
         return "\(n) \(word) на полке"
@@ -37,9 +38,10 @@ struct ShelfView: View {
         VStack(spacing: 10) {
             Image(systemName: "tray.and.arrow.down")
                 .font(.system(size: 34)).foregroundStyle(.white.opacity(0.35))
-            Text("Перетащите сюда файлы, картинки, ссылки или текст")
+            Text(L("Перетащите сюда файлы, картинки, ссылки или текст", "Drop files, images, links or text here"))
                 .font(.system(size: 14, weight: .medium)).foregroundStyle(.white.opacity(0.75))
-            Text("Полка открывается сама, если тащить что-нибудь к чёлке.\nПотом вытаскивайте вещи в любую программу или отправляйте по AirDrop.")
+            Text(L("Полка открывается сама, если тащить что-нибудь к чёлке.\nПотом вытаскивайте вещи в любую программу или отправляйте по AirDrop.",
+                   "The shelf opens by itself when you drag something to the notch.\nLater, drag things out into any app or send them via AirDrop."))
                 .font(.system(size: 11.5)).foregroundStyle(.white.opacity(0.4))
                 .multilineTextAlignment(.center)
         }
@@ -62,13 +64,13 @@ struct ShelfView: View {
                     .onTapGesture(count: 2) { actions.shelfOpen(item) }
                     .simultaneousGesture(TapGesture().onEnded { model.shelfSelected = i })
                     .contextMenu {
-                        Button("Вставить") { actions.shelfPick(item, true) }
-                        Button("Скопировать") { actions.shelfPick(item, false) }
-                        if item.url != nil { Button("Открыть") { actions.shelfOpen(item) } }
-                        if item.kind == .file { Button("Показать в Finder") { actions.shelfReveal(item) } }
-                        Button("Отправить по AirDrop") { actions.shelfAirDrop([item]) }
+                        Button(L("Вставить", "Paste")) { actions.shelfPick(item, true) }
+                        Button(L("Скопировать", "Copy")) { actions.shelfPick(item, false) }
+                        if item.url != nil { Button(L("Открыть", "Open")) { actions.shelfOpen(item) } }
+                        if item.kind == .file { Button(L("Показать в Finder", "Show in Finder")) { actions.shelfReveal(item) } }
+                        Button(L("Отправить по AirDrop", "Send via AirDrop")) { actions.shelfAirDrop([item]) }
                         Divider()
-                        Button("Убрать с полки", role: .destructive) { actions.shelfRemove(item) }
+                        Button(L("Убрать с полки", "Remove from Shelf"), role: .destructive) { actions.shelfRemove(item) }
                     }
                     .overlay(alignment: .topTrailing) {
                         if i == model.shelfSelected {
@@ -121,7 +123,7 @@ struct ShelfTile: View {
             thumb
                 .frame(width: 58, height: 58)
                 .opacity(item.exists ? 1 : 0.35)
-            Text(item.exists ? item.name : "Файл пропал")
+            Text(item.exists ? item.name : L("Файл пропал", "File is missing"))
                 .font(.system(size: 10.5, weight: .medium))
                 .foregroundStyle(.white.opacity(item.exists ? 0.85 : 0.4))
                 .lineLimit(2)

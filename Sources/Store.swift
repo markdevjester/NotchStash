@@ -39,11 +39,11 @@ struct ClipItem: Codable, Identifiable, Equatable {
                 .filter { !$0.isEmpty }
                 .joined(separator: " ⏎ ")
         case .image:
-            if let s = imageSize { return "Картинка \(Int(s.width))×\(Int(s.height))" }
-            return "Картинка"
+            if let s = imageSize { return L("Картинка", "Image") + " \(Int(s.width))×\(Int(s.height))" }
+            return L("Картинка", "Image")
         case .files:
             let names = paths.map { ($0 as NSString).lastPathComponent }
-            return names.count == 1 ? names[0] : "\(names.count) файл(а): " + names.joined(separator: ", ")
+            return names.count == 1 ? names[0] : L("\(names.count) файл(а): ", "\(names.count) files: ") + names.joined(separator: ", ")
         }
     }
 }

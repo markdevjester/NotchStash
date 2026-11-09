@@ -20,8 +20,6 @@
   <img src="previews/history.jpg" width="820" alt="NotchStash history sliding out of the notch">
 </p>
 
-> **Heads-up:** the interface is in Russian for now. An English UI is next on the list.
-
 ## Features
 
 **Clipboard history in the notch.** Everything you copy — text, images, files — is saved and survives restarts. Press **⇧⌘V** or hover over the notch, and the history springs out of it. Search, pin, paste with ↩.
@@ -41,9 +39,9 @@
 
 **Wrong keyboard layout fix.** Typed `ghbdtn` instead of `привет`? NotchStash notices and pastes the fixed text with **⌘L** — both ways, RU ↔ EN, checked against macOS dictionaries.
 
-**Text from screenshots.** Every copied image is read on-device with Apple Vision (English, Russian, Ukrainian). Paste the text with **⌘T**, tap links, emails and phone numbers right on the card, and find old screenshots by the words on them.
+<p align="center"><img src="previews/layout.jpg" width="620" alt="Wrong keyboard layout detected"></p>
 
-<p align="center"><img src="previews/screenshot-text.jpg" width="620" alt="Text recognised from a screenshot"></p>
+**Text from screenshots.** Every copied image is read on-device with Apple Vision (English, Russian, Ukrainian) — that's the card in the screenshot at the top. Paste the text with **⌘T**, tap links, emails and phone numbers right on the card, and find old screenshots by the words on them.
 
 **The shelf.** Drag files, images, links or text to the notch — it opens and keeps them. Drag them back out into any app later, or AirDrop them all at once.
 
@@ -53,12 +51,14 @@
 
 ## Install
 
-1. Download `NotchStash-1.0.0.zip` from [Releases](https://github.com/markdevjester/NotchStash/releases/latest), unzip, and move `NotchStash.app` to **Applications**.
+1. Download `NotchStash-1.0.1.zip` from [Releases](https://github.com/markdevjester/NotchStash/releases/latest), unzip, and move `NotchStash.app` to **Applications**.
 2. First launch: the app isn't notarized by Apple yet, so macOS will say it can't verify the developer.
    Open **System Settings → Privacy & Security**, scroll down and click **Open Anyway**.
 3. The icon appears in the menu bar. Press **⇧⌘V** or hover over the notch.
 
 For instant paste on ↩, allow NotchStash in **System Settings → Privacy & Security → Accessibility**. Without it, items are copied and you paste with ⌘V yourself.
+
+The interface follows your system language — English or Russian. Change it in the menu bar icon → **Language**.
 
 Requires macOS 14 or later. Works on Apple Silicon and Intel; on screens without a notch it draws a virtual one.
 
@@ -93,12 +93,12 @@ zsh build.sh --install   # build a universal app, copy to /Applications, launch
 Tests (layout fix, calculator, colors, links, JSON, code, shelf, OCR):
 
 ```bash
-swiftc -swift-version 5 Sources/Smart.swift Sources/Store.swift Sources/Shelf.swift Sources/OCR.swift Tests/main.swift -o /tmp/notchstash-test && /tmp/notchstash-test
+swiftc -swift-version 5 Sources/L10n.swift Sources/Smart.swift Sources/Store.swift Sources/Shelf.swift Sources/OCR.swift Tests/main.swift -o /tmp/notchstash-test && /tmp/notchstash-test
 ```
 
 ## Roadmap
 
-- English interface
+- More interface languages
 - Weekly "clipboard wrapped" card you can share
 - Translate and summarise copied text with Apple's on-device model
 - Signed and notarized builds, Homebrew cask

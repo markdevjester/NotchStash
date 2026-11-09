@@ -82,12 +82,12 @@ enum TextTransform: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .layout: return "Раскладка"
-        case .translit: return "Транслит"
-        case .upper: return "ВЕРХНИЙ"
-        case .lower: return "нижний"
-        case .sentence: return "Как в предложении"
-        case .oneLine: return "В одну строку"
+        case .layout: return L("Раскладка", "Fix Layout")
+        case .translit: return L("Транслит", "Translit")
+        case .upper: return L("ВЕРХНИЙ", "UPPERCASE")
+        case .lower: return L("нижний", "lowercase")
+        case .sentence: return L("Как в предложении", "Sentence case")
+        case .oneLine: return L("В одну строку", "One Line")
         }
     }
 

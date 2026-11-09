@@ -6,7 +6,7 @@
 
 ## Установка
 
-1. Скачайте `NotchStash-1.0.0.zip` со страницы [Releases](https://github.com/markdevjester/NotchStash/releases/latest), распакуйте и перетащите `NotchStash.app` в «Программы».
+1. Скачайте `NotchStash-1.0.1.zip` со страницы [Releases](https://github.com/markdevjester/NotchStash/releases/latest), распакуйте и перетащите `NotchStash.app` в «Программы».
 2. Первый запуск: приложение пока не подписано у Apple, поэтому macOS скажет, что не может проверить разработчика.
    Откройте «Системные настройки → Конфиденциальность и безопасность», пролистайте вниз и нажмите «Всё равно открыть».
 3. Иконка появится в строке меню, история — по **⇧⌘V** или наведением на чёлку.
@@ -20,6 +20,7 @@
 - **⌘T** — вставить текст с выбранной картинки.
 - **⌘P** — закрепить (закреплённые всегда сверху и не удаляются при чистке).
 - **⌘⌫** — удалить запись, **esc** — закрыть.
+- Язык интерфейса — как в системе (русский или английский), меняется в меню: «Язык».
 - **⇥** — переключить «Историю» и «Полку».
 - После каждого копирования чёлка на секунду показывает «Скопировано».
 - Иконка в строке меню: последние 10 записей, пауза, настройки, автозапуск.
@@ -83,5 +84,5 @@ zsh build.sh --release  # собрать архив для GitHub
 Тесты (раскладка, калькулятор, цвета, ссылки, JSON, код, полка, текст с картинок):
 
 ```bash
-swiftc -swift-version 5 Sources/Smart.swift Sources/Store.swift Sources/Shelf.swift Sources/OCR.swift Tests/main.swift -o /tmp/notchstash-test && /tmp/notchstash-test
+swiftc -swift-version 5 Sources/L10n.swift Sources/Smart.swift Sources/Store.swift Sources/Shelf.swift Sources/OCR.swift Tests/main.swift -o /tmp/notchstash-test && /tmp/notchstash-test
 ```
